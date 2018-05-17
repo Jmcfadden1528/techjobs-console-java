@@ -57,12 +57,12 @@ public class JobData {
     /**
      * Returns results of search the jobs data by key/value, using
      * inclusion of the search term.
-     *
+     * <p>
      * For example, searching for employer "Enterprise" will include results
      * with "Enterprise Holdings, Inc".
      *
-     * @param column   Column that should be searched.
-     * @param value Value of teh field to search for
+     * @param column Column that should be searched.
+     * @param value  Value of teh field to search for
      * @return List of all jobs matching the criteria
      */
     public static ArrayList<HashMap<String, String>> findByColumnAndValue(String column, String value) {
@@ -75,54 +75,87 @@ public class JobData {
         for (HashMap<String, String> row : allJobs) {
 
             String aValue = row.get(column);
+            String aValueLowerCase = aValue.toLowerCase();
 
-            if (aValue.contains(value)) {
+            if (aValueLowerCase.contains(value.toLowerCase())) {
                 jobs.add(row);
             }
         }
-
+        if (jobs.isEmpty()) {
+            System.out.println("Your search returned no results.");
+        }
         return jobs;
     }
 
-    /**
-     * Read in data from a CSV file and store it in a list
-     */
-    private static void loadData() {
+    public static ArrayList<HashMap<String, String>> findByValue(String value) {
 
-        // Only load data once
-        if (isDataLoaded) {
-            return;
+        // load data, if not already loaded
+        loadData();
+
+        ArrayList<HashMap<String, String>> jobs = new ArrayList<>();  //create an empty arraylist
+
+        for (HashMap<String, String> row : allJobs) {
+
+            String aValue = String.valueOf(row.values());
+            String aValueLowerCase = aValue.toLowerCase();
+
+            if (aValueLowerCase.contains(value.toLowerCase())) {
+                jobs.add(row);
+            }
+        }
+        if (jobs.isEmpty()) {
+            System.out.println("Your search returned no results.");
         }
 
-        try {
+            return jobs;
 
-            // Open the CSV file and set up pull out column header info and records
-            Reader in = new FileReader(DATA_FILE);
-            CSVParser parser = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
-            List<CSVRecord> records = parser.getRecords();
-            Integer numberOfColumns = records.get(0).size();
-            String[] headers = parser.getHeaderMap().keySet().toArray(new String[numberOfColumns]);
+            /**
+             * Read in data from a CSV file and store it in a list
+             */
+        }
 
-            allJobs = new ArrayList<>();
+            private static void loadData() {
 
-            // Put the records into a more friendly format
-            for (CSVRecord record : records) {
-                HashMap<String, String> newJob = new HashMap<>();
-
-                for (String headerLabel : headers) {
-                    newJob.put(headerLabel, record.get(headerLabel));
+                // Only load data once
+                if (isDataLoaded) {
+                    return;
                 }
 
-                allJobs.add(newJob);
+                try {
+
+                    // Open the CSV file and set up pull out column header info and records
+                    Reader in = new FileReader(DATA_FILE);
+                    CSVParser parser = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
+                    List<CSVRecord> records = parser.getRecords();
+                    Integer numberOfColumns = records.get(0).size();
+                    String[] headers = parser.getHeaderMap().keySet().toArray(new String[numberOfColumns]);
+
+                    allJobs = new ArrayList<>();
+
+                    // Put the records into a more friendly format
+                    for (CSVRecord record : records) {
+                        HashMap<String, String> newJob = new HashMap<>();
+
+                        for (String headerLabel : headers) {
+                            newJob.put(headerLabel, record.get(headerLabel));
+                        }
+
+                        allJobs.add(newJob);
+                    }
+
+                    // flag the data as loaded, so we don't do it twice
+                    isDataLoaded = true;
+
+                } catch (IOException e) {
+                    System.out.println("Failed to load job data");
+                    e.printStackTrace();
+                }
             }
-
-            // flag the data as loaded, so we don't do it twice
-            isDataLoaded = true;
-
-        } catch (IOException e) {
-            System.out.println("Failed to load job data");
-            e.printStackTrace();
         }
-    }
 
-}
+
+
+
+
+
+
